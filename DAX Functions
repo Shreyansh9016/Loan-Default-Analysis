@@ -1,26 +1,57 @@
-🧮 DAX Measures Used
-🔹 Loan Amount by Purpose
+# 🧮 DAX Measures Documentation  
+**Project:** Loan Default Analysis  
+**Tool:** Power BI (DAX)  
+**Dataset:** Loan_default  
+
+---
+
+## 📌 Overview
+This document provides a structured explanation of all **DAX measures** used in the Loan Default Analysis dashboard.  
+Each measure includes:
+- Purpose
+- DAX Formula
+- Analytical Use Case
+
+---
+
+## 🔹 Loan Amount by Purpose
+
+### **Measure**
+```DAX
 Loan Amount by Purpose =
 SUMX(
     FILTER('Loan_default', NOT(ISBLANK('Loan_default'[LoanAmount]))),
     'Loan_default'[LoanAmount]
 )
+Description
+Calculates the total loan amount by iterating over non-blank loan values.
 
+Usage
+Used in Line Chart
 
-📌 Used in a Line Chart to analyze loan trends by purpose.
-📌 Alternative approach without DAX is also documented using filters and visuals.
+Analyzes loan trends across different loan purposes
+
+Alternative approach also implemented using filters and visuals (without DAX)
 
 🔹 Average Income by Employment Type
+Measure
+DAX
+Copy code
 Average Income by Employement Type =
 CALCULATE(
     AVERAGE('Loan_default'[Income]),
     ALLEXCEPT('Loan_default', 'Loan_default'[EmploymentType])
 )
+Description
+Computes average income while keeping Employment Type as the only active filter.
 
-
-📌 ALLEXCEPT ensures only Employment Type impacts the calculation.
+Key Concept
+ALLEXCEPT() removes all filters except Employment Type
 
 🔹 Default Rate by Employment Type
+Measure
+DAX
+Copy code
 Default Rate by Employment Type =
 VAR totalRecords = COUNTROWS(ALL('Loan_default'))
 VAR defaultCases =
@@ -30,18 +61,31 @@ CALCULATE(
     DIVIDE(defaultCases, totalRecords),
     ALLEXCEPT('Loan_default', 'Loan_default'[EmploymentType])
 )
+Description
+Calculates the default rate segmented by employment type.
+
+Insight
+Identifies employment categories with higher credit risk
 
 🔹 Average Loan Amount by Age Group
+Measure
+DAX
+Copy code
 Average Loan Amount by Age Group =
 AVERAGEX(
     VALUES('Loan_default'[Age Group]),
     AVERAGE('Loan_default'[LoanAmount])
 )
+Description
+Calculates average loan amount for each age group.
 
-
-📌 VALUES() creates a virtual table of Age Groups.
+Key Concept
+VALUES() creates a virtual table of distinct age groups
 
 🔹 Default Rate by Year
+Measure
+DAX
+Copy code
 Default Rate by Year =
 VAR totalLoan =
     CALCULATE(
@@ -55,19 +99,37 @@ VAR default =
     )
 RETURN
 DIVIDE(default, totalLoan) * 100
+Description
+Computes yearly default rate percentage.
+
+Usage
+Trend analysis of loan defaults over time
 
 🔹 Average Loan Amount (High Credit Score)
+Measure
+DAX
+Copy code
 Average Loan Amt (High Credit) =
 AVERAGEX(
     FILTER('Loan_default', 'Loan_default'[Credit Score Bins] = "High"),
     'Loan_default'[LoanAmount]
 )
+Description
+Calculates average loan amount for borrowers with high credit scores.
 
 🔹 Median Loan Amount by Credit Score Bins
+Measure
+DAX
+Copy code
 Median by Credit Score bins =
 MEDIANX('Loan_default', 'Loan_default'[LoanAmount])
+Description
+Returns the median loan amount, reducing the impact of outliers.
 
 🔹 Total Loan Amount (Credit Bins – Adults)
+Measure
+DAX
+Copy code
 Total Loan (Credit Bins) =
 CALCULATE(
     SUM('Loan_default'[LoanAmount]),
@@ -80,21 +142,36 @@ CALCULATE(
         'Loan_default'[Credit Score Bins]
     )
 )
+Description
+Calculates total loan amount for adult borrowers, segmented by credit score bins.
 
 🔹 Total Loan Amount (Middle Age Adults)
+Measure
+DAX
+Copy code
 Total Loan (Middle Age Adults) =
 SUMX(
     FILTER('Loan_default', 'Loan_default'[Age Group] = "Middle Age Adults"),
     'Loan_default'[LoanAmount]
 )
+Description
+Computes total loan disbursement for middle-aged adults.
 
 🔹 Loan Count by Education Type
+Measure
+DAX
+Copy code
 Loan by Education Type =
 COUNTROWS(
     FILTER('Loan_default', NOT(ISBLANK('Loan_default'[LoanID])))
 )
+Description
+Counts total loans issued across different education levels.
 
 🔹 Year-over-Year (YoY) Loan Amount Change
+Measure
+DAX
+Copy code
 YOY Loan Amount Change =
 DIVIDE(
     CALCULATE(
@@ -115,8 +192,13 @@ DIVIDE(
     ),
     0
 ) * 100
+Description
+Measures annual growth or decline in loan amount.
 
 🔹 Year-over-Year (YoY) Default Loan Change
+Measure
+DAX
+Copy code
 YOY Default Loan Change =
 DIVIDE(
     CALCULATE(
@@ -137,8 +219,13 @@ DIVIDE(
     ),
     0
 ) * 100
+Description
+Tracks YoY change in loan defaults.
 
 🔹 Year-to-Date (YTD) Loan Amount
+Measure
+DAX
+Copy code
 YTD Loan Amount =
 CALCULATE(
     SUM('Loan_default'[LoanAmount]),
@@ -149,3 +236,21 @@ CALCULATE(
         'Loan_default'[MaritalStatus]
     )
 )
+Description
+Calculates cumulative loan amount from the beginning of the year to date.
+
+📊 Conclusion
+These DAX measures collectively enable:
+
+Risk analysis
+
+Trend identification
+
+Borrower segmentation
+
+Time-based performance tracking
+
+They form the analytical backbone of the Loan Default Power BI Dashboard.
+
+yaml
+Copy code
