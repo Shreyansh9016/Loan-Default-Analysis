@@ -1,0 +1,151 @@
+🧮 DAX Measures Used
+🔹 Loan Amount by Purpose
+Loan Amount by Purpose =
+SUMX(
+    FILTER('Loan_default', NOT(ISBLANK('Loan_default'[LoanAmount]))),
+    'Loan_default'[LoanAmount]
+)
+
+
+📌 Used in a Line Chart to analyze loan trends by purpose.
+📌 Alternative approach without DAX is also documented using filters and visuals.
+
+🔹 Average Income by Employment Type
+Average Income by Employement Type =
+CALCULATE(
+    AVERAGE('Loan_default'[Income]),
+    ALLEXCEPT('Loan_default', 'Loan_default'[EmploymentType])
+)
+
+
+📌 ALLEXCEPT ensures only Employment Type impacts the calculation.
+
+🔹 Default Rate by Employment Type
+Default Rate by Employment Type =
+VAR totalRecords = COUNTROWS(ALL('Loan_default'))
+VAR defaultCases =
+    COUNTROWS(FILTER('Loan_default', 'Loan_default'[Default] = TRUE()))
+RETURN
+CALCULATE(
+    DIVIDE(defaultCases, totalRecords),
+    ALLEXCEPT('Loan_default', 'Loan_default'[EmploymentType])
+)
+
+🔹 Average Loan Amount by Age Group
+Average Loan Amount by Age Group =
+AVERAGEX(
+    VALUES('Loan_default'[Age Group]),
+    AVERAGE('Loan_default'[LoanAmount])
+)
+
+
+📌 VALUES() creates a virtual table of Age Groups.
+
+🔹 Default Rate by Year
+Default Rate by Year =
+VAR totalLoan =
+    CALCULATE(
+        COUNTROWS('Loan_default'),
+        ALLEXCEPT('Loan_default', 'Loan_default'[Year])
+    )
+VAR default =
+    CALCULATE(
+        COUNTROWS(FILTER('Loan_default', 'Loan_default'[Default] = TRUE())),
+        ALLEXCEPT('Loan_default', 'Loan_default'[Year])
+    )
+RETURN
+DIVIDE(default, totalLoan) * 100
+
+🔹 Average Loan Amount (High Credit Score)
+Average Loan Amt (High Credit) =
+AVERAGEX(
+    FILTER('Loan_default', 'Loan_default'[Credit Score Bins] = "High"),
+    'Loan_default'[LoanAmount]
+)
+
+🔹 Median Loan Amount by Credit Score Bins
+Median by Credit Score bins =
+MEDIANX('Loan_default', 'Loan_default'[LoanAmount])
+
+🔹 Total Loan Amount (Credit Bins – Adults)
+Total Loan (Credit Bins) =
+CALCULATE(
+    SUM('Loan_default'[LoanAmount]),
+    'Loan_default'[Age Group] = "Adults",
+    ALLEXCEPT(
+        'Loan_default',
+        'Loan_default'[Age],
+        'Loan_default'[Age Group],
+        'Loan_default'[CreditScore],
+        'Loan_default'[Credit Score Bins]
+    )
+)
+
+🔹 Total Loan Amount (Middle Age Adults)
+Total Loan (Middle Age Adults) =
+SUMX(
+    FILTER('Loan_default', 'Loan_default'[Age Group] = "Middle Age Adults"),
+    'Loan_default'[LoanAmount]
+)
+
+🔹 Loan Count by Education Type
+Loan by Education Type =
+COUNTROWS(
+    FILTER('Loan_default', NOT(ISBLANK('Loan_default'[LoanID])))
+)
+
+🔹 Year-over-Year (YoY) Loan Amount Change
+YOY Loan Amount Change =
+DIVIDE(
+    CALCULATE(
+        SUM('Loan_default'[LoanAmount]),
+        'Loan_default'[Year] =
+            YEAR(MAX('Loan_default'[Loan_Date_DD_MM_YYYY]))
+    )
+    -
+    CALCULATE(
+        SUM('Loan_default'[LoanAmount]),
+        'Loan_default'[Year] =
+            YEAR(MAX('Loan_default'[Loan_Date_DD_MM_YYYY])) - 1
+    ),
+    CALCULATE(
+        SUM('Loan_default'[LoanAmount]),
+        'Loan_default'[Year] =
+            YEAR(MAX('Loan_default'[Loan_Date_DD_MM_YYYY])) - 1
+    ),
+    0
+) * 100
+
+🔹 Year-over-Year (YoY) Default Loan Change
+YOY Default Loan Change =
+DIVIDE(
+    CALCULATE(
+        COUNTROWS(FILTER('Loan_default', 'Loan_default'[Default] = "True")),
+        'Loan_default'[Year] =
+            YEAR(MAX('Loan_default'[Loan_Date_DD_MM_YYYY]))
+    )
+    -
+    CALCULATE(
+        COUNTROWS(FILTER('Loan_default', 'Loan_default'[Default] = "True")),
+        'Loan_default'[Year] =
+            YEAR(MAX('Loan_default'[Loan_Date_DD_MM_YYYY])) - 1
+    ),
+    CALCULATE(
+        COUNTROWS(FILTER('Loan_default', 'Loan_default'[Default] = "True")),
+        'Loan_default'[Year] =
+            YEAR(MAX('Loan_default'[Loan_Date_DD_MM_YYYY])) - 1
+    ),
+    0
+) * 100
+
+🔹 Year-to-Date (YTD) Loan Amount
+YTD Loan Amount =
+CALCULATE(
+    SUM('Loan_default'[LoanAmount]),
+    DATESYTD('Loan_default'[Loan_Date_DD_MM_YYYY].[Date]),
+    ALLEXCEPT(
+        'Loan_default',
+        'Loan_default'[Credit Score Bins],
+        'Loan_default'[MaritalStatus]
+    )
+)
